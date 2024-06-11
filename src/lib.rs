@@ -31,6 +31,10 @@ impl CrawlCache {
         self.duration = Some(duration);
         self
     }
+     pub fn set_timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = Some(timeout);
+        self
+    }
     pub async fn get_content(&self, url: &str) -> Result<String, CrawlCacheError> {
         let client = self.client()?;
         let content = match client.get(url).send().await {
