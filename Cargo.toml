@@ -1,0 +1,10 @@
+[package]
+name = "uiuifree-crawl-cache"
+version = "0.1.0"
+edition = "2021"
+authors = ["uiuifree"]
+description = ""
+license = "MIT"
+[dependencies]
+reqwest = "0.12"
+tokio = { version = "1", features = ["full"] }
