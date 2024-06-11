@@ -31,7 +31,7 @@ impl CrawlCache {
         self.duration = Some(duration);
         self
     }
-     pub fn set_timeout(mut self, timeout: Duration) -> Self {
+    pub fn set_timeout(mut self, timeout: Duration) -> Self {
         self.timeout = Some(timeout);
         self
     }
@@ -48,14 +48,14 @@ impl CrawlCache {
             Err(e) => Err(CrawlCacheError::Client(e.to_string())),
         }
     }
-    pub async fn get_content_or_storage(
+    pub async fn get_content_or_cache(
         &self,
         url: &str,
         cache_path: &str,
     ) -> Result<String, CrawlCacheError> {
         let path = Path::new(cache_path);
-        if path.is_file() {
-            return Ok(std::fs::read_to_string(cache_path).unwrap());
+        if let Some(cache) = Self::get_cache(cache_path) {
+            return Ok(cache);
         }
 
         let dir_path = path.parent().unwrap().display().to_string();
@@ -76,10 +76,27 @@ impl CrawlCache {
         Ok(content)
     }
 
+    pub fn get_cache(cache_path: &str) -> Option<String> {
+        let path = Path::new(cache_path);
+        if path.is_file() {
+            return match std::fs::read_to_string(cache_path) {
+                Ok(v) => Some(v),
+                Err(_) => None,
+            };
+        }
+        None
+    }
+    pub fn remove_cache(cache_path: &str) -> bool {
+        let path = Path::new(cache_path);
+        if path.is_file() {
+            return std::fs::remove_file(cache_path).is_ok();
+        }
+        true
+    }
+
     fn client(&self) -> Result<Client, CrawlCacheError> {
-        let mut res = reqwest::ClientBuilder::new()
-            .user_agent(&self.user_agent);
-        if let Some(timeout) =  &self.timeout{
+        let mut res = reqwest::ClientBuilder::new().user_agent(&self.user_agent);
+        if let Some(timeout) = &self.timeout {
             res = res.timeout(timeout.clone())
         }
 
