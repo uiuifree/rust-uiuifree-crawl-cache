@@ -12,6 +12,7 @@ pub use error::CrawlCacheError;
 pub struct CrawlCache {
     user_agent: String,
     duration: Option<Duration>,
+    timeout: Option<Duration>,
 }
 
 impl CrawlCache {
@@ -19,6 +20,7 @@ impl CrawlCache {
         CrawlCache {
             user_agent: "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36".to_string(),
             duration: None,
+            timeout: None,
         }
     }
     pub fn set_user_agent(mut self, user_agent: String) -> Self {
@@ -71,10 +73,13 @@ impl CrawlCache {
     }
 
     fn client(&self) -> Result<Client, CrawlCacheError> {
-        let res = reqwest::ClientBuilder::new()
-            .user_agent(&self.user_agent)
-            .build();
-        match res {
+        let mut res = reqwest::ClientBuilder::new()
+            .user_agent(&self.user_agent);
+        if let Some(timeout) =  &self.timeout{
+            res = res.timeout(timeout.clone())
+        }
+
+        match res.build() {
             Ok(v) => Ok(v),
             Err(e) => Err(CrawlCacheError::Client(e.to_string())),
         }
