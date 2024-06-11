@@ -3,7 +3,7 @@ name = "uiuifree-crawl-cache"
 version = "0.1.0"
 edition = "2021"
 authors = ["uiuifree"]
-description = ""
+description = "Crawl Cache"
 license = "MIT"
 [dependencies]
 reqwest = "0.12"
